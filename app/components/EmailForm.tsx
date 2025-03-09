@@ -193,7 +193,28 @@ const EmailForm = () => {
   const handleDeleteDraft = (index: number) => {
     setDrafts((prev) => prev.filter((_, i) => i !== index));
   };
+  const handleDelete = async () => {
+    const confirmDelete = confirm('Are you sure you want to delete all emails?');
 
+    if (confirmDelete) {
+      try {
+        const res = await fetch('/api/sendEmail', {
+          method: 'DELETE',
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          alert(data.message);
+        } else {
+          const error = await res.json();
+          alert(`Error: ${error.error}`);
+        }
+      } catch (error) {
+        console.error('Error calling DELETE endpoint:', error);
+        alert('Failed to delete emails');
+      }
+    }
+  };
   return (
     <>
       <div className="w-[95%] lg:max-w-xl mx-auto p-4 bg-white">
@@ -234,6 +255,12 @@ const EmailForm = () => {
         </form>
 
         {statusMessage && <p className="mt-4 text-green-600">{statusMessage}</p>}
+        <button
+      onClick={handleDelete}
+      className="bg-red-600 my-3 text-white px-4 py-2 rounded hover:bg-red-700"
+    >
+      Delete All Emails
+    </button>
       </div>
 
       <div

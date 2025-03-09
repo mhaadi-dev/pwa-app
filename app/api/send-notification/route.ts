@@ -2,12 +2,14 @@ import admin from "firebase-admin";
 import serviceAccount from "../../serviceAccountKey.json"; // Use ES6 import
 
 // Initialize Firebase Admin SDK
+const privateKey = process.env.PRIVATE_KEY!.replace(/\\n/g, "\n");
+
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: serviceAccount.project_id,
-      clientEmail: serviceAccount.client_email,
-      privateKey: serviceAccount.private_key.replace(/\\n/g, "\n"), // Ensure proper formatting
+      projectId: process.env.PROJECT_ID,
+      clientEmail: process.env.CLIENT_EMAIL,
+      privateKey
     }),
   });
 }
@@ -26,7 +28,7 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log("FCM Token:", token); // Log the token for debugging
+    
 
     const sendNotification = async () => {
       const notification = {
