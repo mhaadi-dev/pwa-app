@@ -65,3 +65,17 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch emails' }, { status: 500 });
   }
 }
+export async function DELETE() {
+  try {
+    // Connect to the database
+    await connectDb();
+
+    // Delete all documents in the collection
+    await Email.deleteMany({});
+
+    return NextResponse.json({ message: 'All documents deleted successfully' }, { status: 200 });
+  } catch (error) {
+    console.error('Error deleting documents:', error);
+    return NextResponse.json({ error: 'Failed to delete documents' }, { status: 500 });
+  }
+}
