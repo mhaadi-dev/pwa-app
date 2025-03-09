@@ -170,7 +170,7 @@ define(["./workbox-aa13a187"], function (e) {
         },
         { url: "/manifest.json", revision: "334778040361192d914eaac3a26212ee" },
         { url: "/next.svg", revision: "8e061864f388b47f33a1c3780831193e" },
-        { url: "/offline.html", revision: "10b9bfddb76109b815fe78999e330e3b" },
+        // { url: "/offline.html", revision: "10b9bfddb76109b815fe78999e330e3b" },
         { url: "/vercel.svg", revision: "c0af2f507b369b085b35ef4bbe3bcf1e" },
         { url: "/window.svg", revision: "a2760511c65806022ad20adf74370ff3" }
       ],
