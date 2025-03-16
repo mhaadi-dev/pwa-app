@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react'; // Add useCallback
-import useOnlineStatus from '../hooks/useOnlineStatus';
-import { requestNotificationPermission } from '../firebase/config';
+import { useState, useEffect, useCallback } from "react"; // Add useCallback
+import useOnlineStatus from "../hooks/useOnlineStatus";
+import { requestNotificationPermission } from "../firebase/config";
 
 interface EmailData {
   to: string;
@@ -14,14 +14,14 @@ const EmailForm = () => {
   const isOnline = useOnlineStatus();
   const [loading, setLoading] = useState(false);
   const [emailData, setEmailData] = useState<EmailData>({
-    to: '',
-    subject: '',
-    message: '',
+    to: "",
+    subject: "",
+    message: ""
   });
   const [drafts, setDrafts] = useState<EmailData[]>([]);
   const [sentEmails, setSentEmails] = useState<EmailData[]>([]);
-  const [statusMessage, setStatusMessage] = useState<string>('');
-  const [fcmToken, setFcmToken] = useState('');
+  const [statusMessage, setStatusMessage] = useState<string>("");
+  const [fcmToken, setFcmToken] = useState("");
 
   useEffect(() => {
     const getToken = async () => {
@@ -34,24 +34,24 @@ const EmailForm = () => {
   }, []);
 
   useEffect(() => {
-    const savedDrafts = localStorage.getItem('emailDrafts');
+    const savedDrafts = localStorage.getItem("emailDrafts");
     if (savedDrafts) {
       setDrafts(JSON.parse(savedDrafts));
     }
 
-    const savedSent = localStorage.getItem('sentEmails');
+    const savedSent = localStorage.getItem("sentEmails");
     const checkInternet = async () => {
       try {
-        const response = await fetch('/api/sendEmail', { method: 'GET' });
+        const response = await fetch("/api/sendEmail", { method: "GET" });
         if (response.ok) {
           const data = await response.json();
           setSentEmails(data.emails);
-          localStorage.setItem('sentEmails', JSON.stringify(data.emails));
+          localStorage.setItem("sentEmails", JSON.stringify(data.emails));
         } else {
-          throw new Error('Failed to fetch');
+          throw new Error("Failed to fetch");
         }
       } catch (error) {
-        console.warn('No internet, loading from localStorage.', error);
+        console.warn("No internet, loading from localStorage.", error);
         if (savedSent) {
           setSentEmails(JSON.parse(savedSent));
         }
@@ -61,46 +61,56 @@ const EmailForm = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('emailDrafts', JSON.stringify(drafts));
+    localStorage.setItem("emailDrafts", JSON.stringify(drafts));
   }, [drafts]);
 
   useEffect(() => {
-    localStorage.setItem('sentEmails', JSON.stringify(sentEmails));
+    localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
   }, [sentEmails]);
 
-  const sendNotification = useCallback(async (message: string) => {
-    try {
-      if (!isOnline) {
-        // Queue the notification if offline
-        const queuedNotifications = JSON.parse(localStorage.getItem('queuedNotifications') || '[]');
-        queuedNotifications.push(message);
-        localStorage.setItem('queuedNotifications', JSON.stringify(queuedNotifications));
-        return;
-      }
+  const sendNotification = useCallback(
+    async (message: string) => {
+      try {
+        if (!isOnline) {
+          // Queue the notification if offline
+          const queuedNotifications = JSON.parse(
+            localStorage.getItem("queuedNotifications") || "[]"
+          );
+          queuedNotifications.push(message);
+          localStorage.setItem(
+            "queuedNotifications",
+            JSON.stringify(queuedNotifications)
+          );
+          return;
+        }
 
-      await fetch('/api/send-notification', {
-        method: 'POST',
-        body: JSON.stringify({
-          token: fcmToken,
-          message,
-          delay: 5000, // 5s delay
-        }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } catch (error) {
-      console.error('Error sending notification:', error);
-    }
-  }, [isOnline, fcmToken]);
+        await fetch("/api/send-notification", {
+          method: "POST",
+          body: JSON.stringify({
+            token: fcmToken,
+            message,
+            delay: 5000 // 5s delay
+          }),
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (error) {
+        console.error("Error sending notification:", error);
+      }
+    },
+    [isOnline, fcmToken]
+  );
 
   // Send queued notifications when online
   useEffect(() => {
     if (isOnline) {
-      const queuedNotifications = JSON.parse(localStorage.getItem('queuedNotifications') || '[]');
+      const queuedNotifications = JSON.parse(
+        localStorage.getItem("queuedNotifications") || "[]"
+      );
       if (queuedNotifications.length > 0) {
         queuedNotifications.forEach((message: string) => {
           sendNotification(message);
         });
-        localStorage.removeItem('queuedNotifications'); // Clear the queue
+        localStorage.removeItem("queuedNotifications"); // Clear the queue
       }
     }
   }, [isOnline, sendNotification]);
@@ -130,76 +140,84 @@ const EmailForm = () => {
     if (isOnline && drafts.length > 0) {
       drafts.forEach(async (draft, index) => {
         try {
-          const res = await fetch('/api/sendEmail', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(draft),
+          const res = await fetch("/api/sendEmail", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(draft)
           });
           if (res.ok) {
             setSentEmails((prev) => [...prev, draft]);
             setDrafts((prev) => prev.filter((_, i) => i !== index));
           }
         } catch (error) {
-          console.error('Failed to send draft email:', error);
+          console.error("Failed to send draft email:", error);
         }
       });
-      sendNotification("Some emails were in drafts. Ensure you're connected to the internet.");
+      sendNotification(
+        "Some emails were in drafts. Ensure you're connected to the internet."
+      );
     }
   }, [isOnline, drafts, sendNotification]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setEmailData({ ...emailData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailData.to || !emailData.subject || !emailData.message) {
-      setStatusMessage('Please fill in all fields.');
+      setStatusMessage("Please fill in all fields.");
       return;
     }
 
     if (isOnline) {
       setLoading(true);
       try {
-        const res = await fetch('/api/sendEmail', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(emailData),
+        const res = await fetch("/api/sendEmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(emailData)
         });
 
         if (res.ok) {
-          setStatusMessage('Email sent successfully.');
+          setStatusMessage("Email sent successfully.");
           setSentEmails((prev) => [...prev, emailData]);
-          sendNotification('Your email has been successfully sent!');
+          sendNotification("Your email has been successfully sent!");
           setLoading(false);
         } else {
-          setStatusMessage('Error sending email.');
+          setStatusMessage("Error sending email.");
         }
       } catch (error) {
         setLoading(false);
         console.error(error);
-        setStatusMessage('Error sending email.');
+        setStatusMessage("Error sending email.");
       }
     } else {
       setDrafts((prev) => [...prev, emailData]);
-      setStatusMessage('No internet. Email saved as draft.');
+      setStatusMessage("No internet. Email saved as draft.");
       setLoading(false);
-      sendNotification('Your email is saved as a draft. Connect to the internet to send it.');
+      sendNotification(
+        "Your email is saved as a draft. Connect to the internet to send it."
+      );
     }
 
-    setEmailData({ to: '', subject: '', message: '' });
+    setEmailData({ to: "", subject: "", message: "" });
   };
 
   const handleDeleteDraft = (index: number) => {
     setDrafts((prev) => prev.filter((_, i) => i !== index));
   };
   const handleDelete = async () => {
-    const confirmDelete = confirm('Are you sure you want to delete all emails?');
+    const confirmDelete = confirm(
+      "Are you sure you want to delete all emails?"
+    );
 
     if (confirmDelete) {
       try {
-        const res = await fetch('/api/sendEmail', {
-          method: 'DELETE',
+        const res = await fetch("/api/sendEmail", {
+          method: "DELETE"
         });
 
         if (res.ok) {
@@ -210,15 +228,15 @@ const EmailForm = () => {
           alert(`Error: ${error.error}`);
         }
       } catch (error) {
-        console.error('Error calling DELETE endpoint:', error);
-        alert('Failed to delete emails');
+        console.error("Error calling DELETE endpoint:", error);
+        alert("Failed to delete emails");
       }
     }
   };
   return (
     <>
-      <div className="w-[95%] lg:max-w-xl mx-auto p-4 bg-white">
-        <h1 className="text-2xl font-bold mb-4" style={{ color: 'orange' }}>
+      <div className="w-[95%] lg:max-w-full rounded-lg  mx-auto p-4 px-6 bg-black/80 border">
+        <h1 className="text-2xl font-bold mb-4" style={{ color: "orange" }}>
           Compose Email
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4 text-black">
@@ -249,29 +267,41 @@ const EmailForm = () => {
             rows={5}
             required
           />
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
-            {loading ? 'Sending...' : 'Send Email'}
-          </button>
+          <div className="flex gap-3 items-center">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded"
+            >
+              {loading ? "Sending..." : "Send Email"}
+            </button>
+            <button
+              onClick={handleDelete}
+              className="bg-red-600 my-3 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Delete All Emails
+            </button>
+          </div>
         </form>
 
-        {statusMessage && <p className="mt-4 text-green-600">{statusMessage}</p>}
-        <button
-      onClick={handleDelete}
-      className="bg-red-600 my-3 text-white px-4 py-2 rounded hover:bg-red-700"
-    >
-      Delete All Emails
-    </button>
+        {statusMessage && (
+          <p className="mt-4 text-green-600">{statusMessage}</p>
+        )}
       </div>
 
       <div
-        className="flex flex-col items-center gap-y-5 w-full lg:flex-row justify-between px-14 mx-auto lg:items-start border bg-black"
-        style={{ width: '95%', background: 'black', padding: '1rem' }}
+        className="flex flex-col items-center gap-y-5 w-full lg:flex-row justify-between px-14 mx-auto lg:items-start border rounded-xl bg-black"
+        style={{ width: "95%", background: "black", padding: "1rem" }}
       >
         <div
-          className="mt-8 w-full bg-gray-700"
-          style={{ background: 'white', color: 'black', margin: '0 1rem', padding: '1rem' }}
+          className="mt-8 w-full bg-gray-700 rounded-xl min-h-[200px]"
+          style={{
+            background: "white",
+            color: "black",
+            margin: "0 1rem",
+            padding: "1rem"
+          }}
         >
-          <h2 className="text-xl font-bold bg-gray-700" style={{ color: 'orange' }}>
+          <h2 className="text-xl font-bold" style={{ color: "orange" }}>
             Draft Emails
           </h2>
           {drafts.length === 0 ? (
@@ -300,10 +330,15 @@ const EmailForm = () => {
         </div>
 
         <div
-          className="mt-8 w-full"
-          style={{ background: 'white', color: 'black', margin: '0 1rem', padding: '1rem' }}
+          className="mt-8 w-full rounded-xl min-h-[200px]"
+          style={{
+            background: "white",
+            color: "black",
+            margin: "0 1rem",
+            padding: "1rem"
+          }}
         >
-          <h2 className="text-xl font-bold" style={{ color: 'orange' }}>
+          <h2 className="text-xl font-bold" style={{ color: "orange" }}>
             Sent Emails
           </h2>
           {sentEmails.length === 0 ? (

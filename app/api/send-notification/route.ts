@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-// import serviceAccount from "../../serviceAccountKey.json"; 
+import serviceAccount from "../../serviceAccountKey.json"; // Use ES6 import
 
 // Initialize Firebase Admin SDK
 const privateKey = process.env.PRIVATE_KEY!.replace(/\\n/g, "\n");
@@ -10,7 +10,7 @@ if (!admin.apps.length) {
       projectId: process.env.PROJECT_ID,
       clientEmail: process.env.CLIENT_EMAIL,
       privateKey
-    }),
+    })
   });
 }
 
@@ -28,15 +28,13 @@ export async function POST(req: Request) {
       );
     }
 
-    
-
     const sendNotification = async () => {
       const notification = {
         token,
         notification: {
           title: "Custom Notification",
-          body: message || "Your email has been sent successfully!",
-        },
+          body: message || "Your email has been sent successfully!"
+        }
       };
 
       console.log("Notification Payload:", notification); // Log the payload for debugging
@@ -62,7 +60,7 @@ export async function POST(req: Request) {
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Notification scheduled in ${delayTime / 1000} seconds`,
+        message: `Notification scheduled in ${delayTime / 1000} seconds`
       }),
       { status: 200 }
     );
@@ -74,8 +72,6 @@ export async function POST(req: Request) {
     );
   }
 }
-
-  
 
 // import admin from "firebase-admin";
 // import { NextRequest, NextResponse } from "next/server";
@@ -140,20 +136,16 @@ export async function POST(req: Request) {
 //   }
 // }
 
-
-
-
-
 // export async function POST(req: any) {
 //     try {
 //       const { token, message, delay } = await req.json();
-  
+
 //       if (!token) {
 //         return new Response(JSON.stringify({ error: "FCM token is required" }), { status: 400 });
 //       }
-  
+
 //       const delaySeconds = delay ? Math.max(0, delay) : 5; // Default delay of 5 seconds
-  
+
 //       const notification: admin.messaging.Message = {
 //         token,
 //         notification: {
@@ -162,19 +154,19 @@ export async function POST(req: Request) {
 //         },
 //         android: {
 //           priority: "high",
-//           ttl: delaySeconds * 1000, 
+//           ttl: delaySeconds * 1000,
 //         },
 //         apns: {
 //           headers: {
 //             "apns-priority": "10",
-//             "apns-expiration": `${Math.floor(Date.now() / 1000) + delaySeconds}`, 
+//             "apns-expiration": `${Math.floor(Date.now() / 1000) + delaySeconds}`,
 //           },
 //         },
 //       };
-  
+
 //       // Schedule the notification for delayed delivery
 //       await admin.messaging().send(notification);
-  
+
 //       return new Response(
 //         JSON.stringify({ success: true, message: `Notification scheduled in ${delaySeconds} seconds` }),
 //         { status: 200 }
@@ -185,28 +177,14 @@ export async function POST(req: Request) {
 //     }
 //   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // export async function POST(req: any) {
 //     try {
 //       const { token, message, delay } = await req.json();
-  
+
 //       if (!token) {
 //         return new Response(JSON.stringify({ error: "FCM token is required" }), { status: 400 });
 //       }
-  
+
 //       const notification = {
 //         token,
 //         notification: {
@@ -214,7 +192,7 @@ export async function POST(req: Request) {
 //           body: message || "Your email is still in drafts. Connect to the internet to send it.",
 //         },
 //       };
-  
+
 //       setTimeout(async () => {
 //         try {
 //           await messaging.send(notification);
@@ -222,8 +200,8 @@ export async function POST(req: Request) {
 //         } catch (error) {
 //           console.error("Error sending notification:", error);
 //         }
-//       }, delay || 5000); 
-  
+//       }, delay || 5000);
+
 //       return new Response(
 //         JSON.stringify({ success: true, message: `Notification scheduled in ${(delay || 5000) / 1000} seconds` }),
 //         { status: 200 }
