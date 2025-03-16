@@ -7,7 +7,6 @@ firebase.initializeApp({
   projectId: "webpush-notification-fb522",
   storageBucket: "webpush-notification-fb522.firebasestorage.app",
   messagingSenderId: "507516122860",
-  appId: "YOUR_APP_ID",
   appId: "1:507516122860:web:efa59a834887b1d99ed7c9",
 });
 
