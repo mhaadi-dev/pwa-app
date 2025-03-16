@@ -2,69 +2,44 @@ const withPWA = require("next-pwa")({
   dest: "public",
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
+  cacheOnFrontEndNav: true,
   runtimeCaching: [
     {
-      urlPattern: "/",
+      urlPattern: ({ url }: { url: URL }) => url.pathname === "/",
       handler: "NetworkFirst",
       options: {
-        cacheName: "start-url",
+        cacheName: "html-cache",
         expiration: {
-          maxEntries: 1,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
+          maxEntries: 50,
+          maxAgeSeconds: 24 * 60 * 60
         }
       }
     },
     {
-      urlPattern: /^https?.*/,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "https-calls",
-        networkTimeoutSeconds: 15,
-        expiration: {
-          maxEntries: 150,
-          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
-        },
-        cacheableResponse: {
-          statuses: [0, 200]
-        }
-      }
-    },
-    {
-      urlPattern: /\.(?:js|css)$/i,
+      urlPattern: ({ url }: { url: URL }) =>
+        /\.(css|js|woff2|woff|ttf)$/.test(url.pathname),
       handler: "StaleWhileRevalidate",
       options: {
         cacheName: "static-resources",
         expiration: {
-          maxEntries: 150,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        },
-        cacheableResponse: {
-          statuses: [0, 200]
+          maxEntries: 100,
+          maxAgeSeconds: 7 * 24 * 60 * 60
         }
       }
     },
     {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|ico|webp)$/i,
-      handler: "CacheFirst",
+      urlPattern: ({ url }: { url: URL }) => true, // Handle all failed requests
+      handler: "NetworkOnly",
       options: {
-        cacheName: "images",
-        expiration: {
-          maxEntries: 150,
-          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
-        },
-        cacheableResponse: {
-          statuses: [0, 200]
-        }
+        cacheName: "fallback-cache"
       }
     }
   ],
   fallbacks: {
-    document: "/" // Return index page for all navigation requests
+    document: "/" // Ensure offline page is used
   }
 });
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
     appDir: true
