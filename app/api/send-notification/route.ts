@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-import serviceAccount from "../../serviceAccountKey.json"; // Use ES6 import
+// import serviceAccount from "../../serviceAccountKey.json"; // Use ES6 import
 
 // Initialize Firebase Admin SDK
 const privateKey = process.env.PRIVATE_KEY!.replace(/\\n/g, "\n");
