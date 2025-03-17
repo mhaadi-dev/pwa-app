@@ -40,6 +40,7 @@ const EmailForm = () => {
     }
 
     const savedSent = localStorage.getItem("sentEmails");
+    console.log("SAVED",savedSent)
     const checkInternet = async () => {
       try {
         const response = await fetch("/api/sendEmail", { method: "GET" });
@@ -65,25 +66,28 @@ const EmailForm = () => {
   // }, [drafts]);
 
   // useEffect(() => {
-  //   localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
+  //   if(isOnline){
+  //     localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
+  //   }
+    
   // }, [sentEmails]);
 
 
   const sendNotification = useCallback(
     async (message: string) => {
       try {
-        if (!isOnline) {
-          // Queue the notification if offline
-          const queuedNotifications = JSON.parse(
-            localStorage.getItem("queuedNotifications") || "[]"
-          );
-          queuedNotifications.push(message);
-          localStorage.setItem(
-            "queuedNotifications",
-            JSON.stringify(queuedNotifications)
-          );
-          return;
-        }
+        // if (!isOnline) {
+        //   // Queue the notification if offline
+        //   const queuedNotifications = JSON.parse(
+        //     localStorage.getItem("queuedNotifications") || "[]"
+        //   );
+        //   queuedNotifications.push(message);
+        //   localStorage.setItem(
+        //     "queuedNotifications",
+        //     JSON.stringify(queuedNotifications)
+        //   );
+        //   return;
+        // }
 
         await fetch("/api/send-notification", {
           method: "POST",
@@ -321,7 +325,7 @@ const EmailForm = () => {
                 </p>
                 <button
                   onClick={() => handleDeleteDraft(index)}
-                  className="!text-red-500 bg-red-300 underline"
+                  className="!text-red-500 bg-red-200 underline p-2 my-2 rounded-xl"
                 >
                   Delete Draft
                 </button>
