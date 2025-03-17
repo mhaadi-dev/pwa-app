@@ -60,13 +60,14 @@ const EmailForm = () => {
     checkInternet();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("emailDrafts", JSON.stringify(drafts));
-  }, [drafts]);
+  // useEffect(() => {
+  //   localStorage.setItem("emailDrafts", JSON.stringify(drafts));
+  // }, [drafts]);
 
-  useEffect(() => {
-    localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
-  }, [sentEmails]);
+  // useEffect(() => {
+  //   localStorage.setItem("sentEmails", JSON.stringify(sentEmails));
+  // }, [sentEmails]);
+
 
   const sendNotification = useCallback(
     async (message: string) => {
@@ -101,19 +102,19 @@ const EmailForm = () => {
   );
 
   // Send queued notifications when online
-  useEffect(() => {
-    if (isOnline) {
-      const queuedNotifications = JSON.parse(
-        localStorage.getItem("queuedNotifications") || "[]"
-      );
-      if (queuedNotifications.length > 0) {
-        queuedNotifications.forEach((message: string) => {
-          sendNotification(message);
-        });
-        localStorage.removeItem("queuedNotifications"); // Clear the queue
-      }
-    }
-  }, [isOnline, sendNotification]);
+  // useEffect(() => {
+  //   if (isOnline) {
+  //     const queuedNotifications = JSON.parse(
+  //       localStorage.getItem("queuedNotifications") || "[]"
+  //     );
+  //     if (queuedNotifications.length > 0) {
+  //       queuedNotifications.forEach((message: string) => {
+  //         sendNotification(message);
+  //       });
+  //       localStorage.removeItem("queuedNotifications"); // Clear the queue
+  //     }
+  //   }
+  // }, [isOnline, sendNotification]);
 
   // Notify user when emails are in drafts and there's no internet after 10 seconds
   // useEffect(() => {
